@@ -46,7 +46,6 @@ module.exports = {
     }, 
     updatePasswordSchema:{
         body: Joi.object().required().keys({
-            email: Joi.string().required().email(),
             oldPassword: Joi.string().required(),
             password: Joi.string().required().messages({
                 'string.empty':'sorry password is required',

@@ -7,7 +7,7 @@ const crypto = require ("crypto");
 //print all the users on the DB
 const getAllUsers= async (req,res)=>{
   if(req.user.role == 'admin'){
-    let users = await User.find({}).select('-password').select('-cPassword');
+    let users = await User.find({deactivated:false}).select('-password').select('-cPassword');
     res.json({message:'all users',data: users})
   }else{
     res.status(StatusCodes.UNAUTHORIZED).json({message:'Unauthorized'})
@@ -75,7 +75,7 @@ const updateProfile = async (req, res) => {
     const { userName } = req.body;
     try {
       if(req.user._id == id){
-        const userr = await User.updateOne({ _id:id }, { userName });
+        const userr = await User.updateOne({ _id:id}, { userName });
         res.json({ message: "updated success", userr });
       }
     } catch (error) {
@@ -85,12 +85,14 @@ const updateProfile = async (req, res) => {
 
 //update password
 const updatePassword = async (req, res) => {
-    const { email,oldPassword,password,cPassword } = req.body;
+    const {oldPassword,password,cPassword } = req.body;
+    const email = req.user.email;
+    console.log(email)
     try {
             bcrypt.hash(password,7,async function(err,hash){
             bcrypt.hash(cPassword,7,async function(err,hashed){
             if(err) throw err;
-            const user = await User.findOne({email});
+            const user = await User.findOne({email},{deactivated:false});
             const match = await bcrypt.compare(oldPassword,user.password);
             if(user && match){
                 if(password == cPassword){
